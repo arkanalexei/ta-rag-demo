@@ -7,7 +7,7 @@ from langdetect import detect
 
 def load_metadata(metadata_dir):
     metadata_dict = {}
-    for subdir in ['id', 'en']:
+    for subdir in ['uu']:
         full_dir_path = os.path.join(metadata_dir, subdir)
         for filename in os.listdir(full_dir_path):
             if filename.endswith('.json'):
@@ -15,7 +15,7 @@ def load_metadata(metadata_dir):
                 with open(filepath, 'r') as f:
                     metadata_list = json.load(f)
                     for item in metadata_list:
-                        metadata_dict[item['file_id']] = item
+                        metadata_dict[item['id']] = item
     return metadata_dict
 
 def ensure_metadata_fields(metadata, required_fields):

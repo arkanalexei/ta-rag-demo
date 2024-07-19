@@ -26,7 +26,6 @@ def get_embedding_model(model="text-embedding-3-small"):
     embed_model = OpenAIEmbeddings(
         api_key=api_key,
         model=model,
-        batch_size=256
     )
     
     return embed_model
