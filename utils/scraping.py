@@ -29,7 +29,7 @@ def create_metadata(row, doc_url, unique_id, new_filename):
             "ditetapkan_tanggal": row['ditetapkan_tanggal'],
             "status": row['status'],
             "dokumen_peraturan": doc_url,
-            "unique_id": unique_id,
-            "downloaded_filename": new_filename
+            "id": unique_id,
+            "filename": new_filename
         }
     return metadata
