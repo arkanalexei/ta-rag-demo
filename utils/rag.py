@@ -1,5 +1,5 @@
 import os
-from typing import List
+import pickle
 
 from langchain.chains.conversational_retrieval.base import \
     ConversationalRetrievalChain
@@ -9,22 +9,13 @@ from langchain.retrievers import (ContextualCompressionRetriever,
                                   MergerRetriever, MultiQueryRetriever,
                                   ParentDocumentRetriever)
 from langchain.retrievers.document_compressors import CohereRerank
-from langchain.storage import InMemoryStore
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
 
+from utils.constants import DOCSTORE_PATH
 from utils.llm import get_embedding_model, get_llm
 from utils.utils import is_language_indonesian, translate
 
-
-def double_rerank_retriever(retriever, reranker, k=30):
-    def retrieve_and_rerank(query):
-        initial_docs = retriever.get_relevant_documents(query)
-        first_rerank = reranker.compress_documents(initial_docs, query)
-        second_rerank = reranker.compress_documents(first_rerank[:150], query)
-        return second_rerank[:k]
-    
-    return retrieve_and_rerank
 
 def format_source_link(title, file_link, page_number=None):
     if page_number:
@@ -58,6 +49,11 @@ def get_user_memory(user_id):
         )
     return user_memories[user_id]
 
+def get_docstore():
+    docstore_file = open(DOCSTORE_PATH,'rb')
+    docstore = pickle.load(docstore_file)
+    return docstore
+
 def get_qa_chain(user_id):
     llm = get_llm()
     embed_model = get_embedding_model()
@@ -70,7 +66,7 @@ def get_qa_chain(user_id):
         llm=llm
     )
 
-    docstore = InMemoryStore()
+    docstore = get_docstore()
 
     child_splitter = RecursiveCharacterTextSplitter(chunk_size=250, chunk_overlap=50)
     parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2500, chunk_overlap=200)
@@ -87,9 +83,8 @@ def get_qa_chain(user_id):
     merger_retriever = MergerRetriever(retrievers=[multi_query_retriever, parent_retriever])
 
     compressor = CohereRerank()
-    double_reranked_retriever = double_rerank_retriever(merger_retriever, compressor)
     compression_retriever = ContextualCompressionRetriever(
-        base_compressor=compressor, base_retriever=double_reranked_retriever
+        base_compressor=compressor, base_retriever=merger_retriever
     )
 
     template = """

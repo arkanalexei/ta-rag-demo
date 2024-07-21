@@ -1,4 +1,6 @@
-OCR_CONFIDENCE_THRESHOLD = 0.98
+OCR_CONFIDENCE_THRESHOLD = 0.90
+
+DOCSTORE_PATH = "pickles/docstore.pkl"
 
 CHROMEDRIVER_PATH="chromedriver/chromedriver.exe"
 
