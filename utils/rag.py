@@ -1,16 +1,30 @@
 import os
+from typing import List
 
 from langchain.chains.conversational_retrieval.base import \
     ConversationalRetrievalChain
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.prompts import PromptTemplate
-from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers import (ContextualCompressionRetriever,
+                                  MergerRetriever, MultiQueryRetriever,
+                                  ParentDocumentRetriever)
 from langchain.retrievers.document_compressors import CohereRerank
+from langchain.storage import InMemoryStore
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
 
 from utils.llm import get_embedding_model, get_llm
 from utils.utils import is_language_indonesian, translate
 
+
+def double_rerank_retriever(retriever, reranker, k=30):
+    def retrieve_and_rerank(query):
+        initial_docs = retriever.get_relevant_documents(query)
+        first_rerank = reranker.compress_documents(initial_docs, query)
+        second_rerank = reranker.compress_documents(first_rerank[:150], query)
+        return second_rerank[:k]
+    
+    return retrieve_and_rerank
 
 def format_source_link(title, file_link, page_number=None):
     if page_number:
@@ -48,19 +62,36 @@ def get_qa_chain(user_id):
     llm = get_llm()
     embed_model = get_embedding_model()
 
-    # Initialize OpenAI and Pinecone
     PINECONE_INDEX_NAME = os.environ.get("PINECONE_INDEX", "langchain-test")
     vectorstore = PineconeVectorStore.from_existing_index(PINECONE_INDEX_NAME, embed_model)
-    # retriever = vectorstore.as_retriever()
 
-    # Cohere Reranker
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
-    compressor = CohereRerank()
-    compression_retriever = ContextualCompressionRetriever(
-        base_compressor=compressor, base_retriever=retriever
+    multi_query_retriever = MultiQueryRetriever.from_llm(
+        retriever=vectorstore.as_retriever(search_kwargs={"k": 10}),
+        llm=llm
     )
 
-    # Custom prompt template
+    docstore = InMemoryStore()
+
+    child_splitter = RecursiveCharacterTextSplitter(chunk_size=250, chunk_overlap=50)
+    parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2500, chunk_overlap=200)
+
+    parent_retriever = ParentDocumentRetriever(
+        vectorstore=vectorstore,
+        docstore=docstore,
+        child_splitter=child_splitter,
+        parent_splitter=parent_splitter,
+        search_kwargs={"k": 5}
+    )
+
+    # Use MergerRetriever to combine results from both retrievers
+    merger_retriever = MergerRetriever(retrievers=[multi_query_retriever, parent_retriever])
+
+    compressor = CohereRerank()
+    double_reranked_retriever = double_rerank_retriever(merger_retriever, compressor)
+    compression_retriever = ContextualCompressionRetriever(
+        base_compressor=compressor, base_retriever=double_reranked_retriever
+    )
+
     template = """
     You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. 
     If you don't know the answer, say that you don't know. Use three sentences maximum and keep the answer concise.
@@ -76,10 +107,8 @@ def get_qa_chain(user_id):
         template=template
     )
 
-    # Get or create the user's memory
     memory = get_user_memory(user_id)
 
-    # Create the conversational chain
     qa_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=compression_retriever,

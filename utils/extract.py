@@ -5,8 +5,12 @@ import fitz
 from langchain_core.documents import Document
 from openpyxl import load_workbook
 from paddleocr import PaddleOCR
+
 from utils.constants import OCR_CONFIDENCE_THRESHOLD
 from utils.utils import ensure_metadata_fields
+
+#TODO: Convert to Markdown
+#TODO: Add contextual header
 
 
 def extract_text_and_images_from_page(doc, page, ocr):
@@ -83,6 +87,10 @@ def extract_text(ocr, file_path):
         return "", []
         # raise ValueError("File not supported!")
 
+def add_contextual_header(document):
+    header = f"DOC NAME: {document.metadata['title']} | {document.metadata['jenis_bentuk_peraturan']}\n\n"
+    document.page_content = header + document.page_content
+    return document
 
 def process_documents(ocr, data_dir, metadata):
     text_data = []
@@ -108,9 +116,13 @@ def process_documents(ocr, data_dir, metadata):
                 for page in page_metadata:
                     page_specific_metadata = file_metadata.copy()
                     page_specific_metadata['page_number'] = page['page_number']
-                    text_data.append(Document(page_content=page['text'], metadata=page_specific_metadata))
+                    document = Document(page_content=page['text'], metadata=page_specific_metadata)
+                    document = add_contextual_header(document)
+                    text_data.append(document)
             else:
-                text_data.append(Document(page_content=text, metadata=file_metadata))
+                document = Document(page_content=text, metadata=file_metadata)
+                document = add_contextual_header(document)
+                text_data.append(document)
 
     return text_data
 
