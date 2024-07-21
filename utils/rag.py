@@ -12,7 +12,8 @@ from langchain.retrievers.document_compressors import CohereRerank
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
 
-from utils.constants import DOCSTORE_PATH
+from utils.constants import (CERTAIN_SYSTEM_PROMPT, DOCSTORE_PATH,
+                             MAIN_SYSTEM_PROMPT)
 from utils.llm import get_embedding_model, get_llm
 from utils.utils import is_language_indonesian, translate
 
@@ -87,19 +88,9 @@ def get_qa_chain(user_id):
         base_compressor=compressor, base_retriever=merger_retriever
     )
 
-    template = """
-    You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. 
-    If you don't know the answer, say that you don't know. Use three sentences maximum and keep the answer concise.
-    Do not include source citations in your answer. The sources will be added separately.
-
-    Context: {context}
-    History: {chat_history}
-    Human: {question}
-    Assistant: """
-
     PROMPT = PromptTemplate(
         input_variables=["context", "chat_history", "question"],
-        template=template
+        template=MAIN_SYSTEM_PROMPT
     )
 
     memory = get_user_memory(user_id)
@@ -115,15 +106,7 @@ def get_qa_chain(user_id):
 
 def is_answer_uncertain(answer):
     llm = get_llm()
-
-    template = """
-    You are an assistant. Determine if the following answer is uncertain or not. 
-    Respond with "uncertain" if the answer is uncertain, otherwise respond with "certain".
-
-    Answer: {answer}
-    """
-    
-    prompt = template.format(answer=answer)
+    prompt = CERTAIN_SYSTEM_PROMPT.format(answer=answer)
     response = llm.invoke(prompt)
     return "uncertain" in response.content.lower()
 
