@@ -3,7 +3,7 @@ import string
 
 import streamlit as st
 from utils.constants import STREAMLIT_INTRO
-from utils.rag import caller
+from utils.rag.mq_agent import caller
 
 # Set the password
 PASSWORD = "rag"

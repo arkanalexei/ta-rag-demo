@@ -1,9 +1,7 @@
 import os
-import pickle
 
 from langchain.chains.conversational_retrieval.base import \
     ConversationalRetrievalChain
-from langchain.memory import ConversationSummaryBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain.retrievers import (ContextualCompressionRetriever,
                                   MergerRetriever, MultiQueryRetriever,
@@ -12,48 +10,12 @@ from langchain.retrievers.document_compressors import CohereRerank
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
 
-from utils.constants import (CERTAIN_SYSTEM_PROMPT, DOCSTORE_PATH,
-                             MAIN_SYSTEM_PROMPT)
+from utils.constants import MAIN_SYSTEM_PROMPT
 from utils.llm import get_embedding_model, get_llm
+from utils.rag.helpers import (format_sources, get_docstore, get_user_memory,
+                               is_answer_uncertain)
 from utils.utils import is_language_indonesian, translate
 
-
-def format_source_link(title, file_link, page_number=None):
-    if page_number:
-        page_number = int(page_number)
-        return f"[{title} - Page: {page_number}]({file_link}#page={page_number})"
-    return f"[{title}]({file_link})"
-
-def format_sources(source_documents):
-    sources = {
-        format_source_link(
-            doc.metadata.get('title', ''),
-            doc.metadata.get('dokumen_peraturan', ''),
-            doc.metadata.get('page_number')
-        )
-        for doc in source_documents
-        if 'title' in doc.metadata and 'dokumen_peraturan' in doc.metadata
-    }
-    return "\n\n".join(sources)
-
-# Create a dictionary to hold memory objects for each user
-user_memories = {}
-
-def get_user_memory(user_id):
-    if user_id not in user_memories:
-        llm = get_llm()
-        user_memories[user_id] = ConversationSummaryBufferMemory(
-            llm=llm,
-            memory_key="chat_history",
-            return_messages=True,
-            output_key="answer"
-        )
-    return user_memories[user_id]
-
-def get_docstore():
-    docstore_file = open(DOCSTORE_PATH,'rb')
-    docstore = pickle.load(docstore_file)
-    return docstore
 
 def get_qa_chain(user_id):
     llm = get_llm()
@@ -77,13 +39,13 @@ def get_qa_chain(user_id):
         docstore=docstore,
         child_splitter=child_splitter,
         parent_splitter=parent_splitter,
-        search_kwargs={"k": 5}
+        search_kwargs={"k": 30}
     )
 
     # Use MergerRetriever to combine results from both retrievers
     merger_retriever = MergerRetriever(retrievers=[multi_query_retriever, parent_retriever])
 
-    compressor = CohereRerank()
+    compressor = CohereRerank(top_n=15)
     compression_retriever = ContextualCompressionRetriever(
         base_compressor=compressor, base_retriever=merger_retriever
     )
@@ -99,16 +61,14 @@ def get_qa_chain(user_id):
         llm=llm,
         retriever=compression_retriever,
         memory=memory,
-        combine_docs_chain_kwargs={"prompt": PROMPT},
-        return_source_documents=True
+        combine_docs_chain_kwargs={
+            "prompt": PROMPT,
+            "document_variable_name": "context",
+            },
+        return_source_documents=True,
+        max_tokens_limit=4000
     )
     return qa_chain
-
-def is_answer_uncertain(answer):
-    llm = get_llm()
-    prompt = CERTAIN_SYSTEM_PROMPT.format(answer=answer)
-    response = llm.invoke(prompt)
-    return "uncertain" in response.content.lower()
 
 def caller(question, user_id):
     qa_chain = get_qa_chain(user_id)
