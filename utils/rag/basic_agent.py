@@ -24,8 +24,8 @@ def get_qa_chain(user_id):
     # retriever = vectorstore.as_retriever()
 
     # Cohere Reranker
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
-    compressor = CohereRerank()
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 30})
+    compressor = CohereRerank(top_n=15)
     compression_retriever = ContextualCompressionRetriever(
         base_compressor=compressor, base_retriever=retriever
     )
@@ -44,7 +44,10 @@ def get_qa_chain(user_id):
         llm=llm,
         retriever=compression_retriever,
         memory=memory,
-        combine_docs_chain_kwargs={"prompt": PROMPT},
+        combine_docs_chain_kwargs={
+            "prompt": PROMPT,
+            "document_variable_name": "context",
+            },
         return_source_documents=True,
         max_tokens_limit=4000
     )
