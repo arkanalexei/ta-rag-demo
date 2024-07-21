@@ -9,9 +9,6 @@ from paddleocr import PaddleOCR
 from utils.constants import OCR_CONFIDENCE_THRESHOLD
 from utils.utils import ensure_metadata_fields
 
-#TODO: Convert to Markdown
-#TODO: Add contextual header
-
 
 def extract_text_and_images_from_page(doc, page, ocr):
     text = page.get_text()
