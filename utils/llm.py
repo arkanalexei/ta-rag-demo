@@ -13,7 +13,7 @@ def get_llm(model="gpt-4o-mini"):
     if not model:
         model = "gpt-4o-mini"
 
-    llm = ChatOpenAI(api_key=api_key, model=model, temperature=0)
+    llm = ChatOpenAI(api_key=api_key, model=model, temperature=0.1)
     
     return llm
 
