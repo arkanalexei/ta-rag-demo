@@ -1,7 +1,7 @@
 import os
 
 import docx2txt
-import fitz
+import pymupdf
 from langchain_core.documents import Document
 from openpyxl import load_workbook
 from paddleocr import PaddleOCR
@@ -17,30 +17,33 @@ def extract_text_and_images_from_page(doc, page, ocr):
     
     # Iterate through all images found on the page
     for image_info in image_list:
-        xref = image_info[0]
-        image_dict = doc.extract_image(xref)
-        image_bytes = image_dict['image']
+        try:
+            xref = image_info[0]
+            image_dict = doc.extract_image(xref)
+            image_bytes = image_dict['image']
+            ocr_result = ocr.ocr(image_bytes)
+            
+            # Check if OCR result is valid before processing
+            if ocr_result and ocr_result != [None]:
+                for result in ocr_result:
+                    for res in result:
+                        text_tuple = res[1]
+                        text_string = text_tuple[0]
+                        text_confidence = text_tuple[1]  # For confidence threshold
 
-        # Use PaddleOCR to extract text from the image
-        ocr_result = ocr.ocr(image_bytes)
-        
-        # Check if OCR result is valid before processing
-        if ocr_result and ocr_result != [None]:
-            for result in ocr_result:
-                for res in result:
-                    text_tuple = res[1]
-                    text_string = text_tuple[0]
-                    text_confidence = text_tuple[1]  # For confidence threshold
-
-                    if text_confidence > OCR_CONFIDENCE_THRESHOLD:
-                        image_text += text_string + '\n'
+                        if text_confidence > OCR_CONFIDENCE_THRESHOLD:
+                            image_text += text_string + '\n'
+        except Exception as e:
+            # print(f"Error processing image on page {page.number}: {str(e)}")
+            continue
     
     # Combine page text and image text
     return text + "\n" + image_text
 
 def extract_text_from_pdf(ocr, pdf_path):
     try:
-        doc = fitz.open(pdf_path)
+        doc = pymupdf.open(pdf_path)
+        print("doc", doc)
         combined_text = ""
         page_data_list = []
         for page_num in range(len(doc)):
@@ -50,6 +53,7 @@ def extract_text_from_pdf(ocr, pdf_path):
             page_data_list.append({'page_number': page_num + 1, 'text': page_text})
         return combined_text, page_data_list
     except:
+        print("error opening pdf!", pdf_path)
         return "", []
 
 def extract_text_from_docx(docx_path):

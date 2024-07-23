@@ -3,7 +3,8 @@ import string
 
 import streamlit as st
 from utils.constants import STREAMLIT_INTRO
-from utils.rag.mq_agent import caller
+from utils.rag.mq_agent import caller as caller_mq_agent
+from utils.rag.basic_agent import caller as caller_basic
 
 # Set the password
 PASSWORD = "rag"
@@ -40,6 +41,16 @@ else:
     if "current_response" not in st.session_state:
         st.session_state.current_response = ""
 
+    # Dropdown to select the pipeline
+    pipeline_options = ["Basic", "Multi Query"]
+    selected_pipeline = st.selectbox("Choose Pipeline", pipeline_options)
+
+    # Define the caller function based on the selected pipeline
+    if selected_pipeline == "Basic":
+        caller_function = caller_basic
+    else:
+        caller_function = caller_mq_agent
+
     # We loop through each message in the session state and render it as
     # a chat message.
     for message in st.session_state.messages:
@@ -59,7 +70,7 @@ else:
             st.markdown(user_prompt)
 
         with st.spinner("Thinking ..."):
-            response = caller(user_prompt, sess_id)
+            response = caller_function(user_prompt, sess_id)
         # Add the response to the session state
         st.session_state.messages.append(
             {"role": "assistant", "content": response}
