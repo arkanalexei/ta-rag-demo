@@ -25,7 +25,7 @@ def get_qa_chain(user_id):
 
     # Cohere Reranker
     retriever = vectorstore.as_retriever(search_kwargs={"k": 30})
-    compressor = CohereRerank(top_n=15)
+    compressor = CohereRerank(top_n=15, model="rerank-multilingual-v3.0")
     compression_retriever = ContextualCompressionRetriever(
         base_compressor=compressor, base_retriever=retriever
     )
@@ -56,16 +56,16 @@ def get_qa_chain(user_id):
 
 def caller(question, user_id):
     qa_chain = get_qa_chain(user_id)
-    is_indonesian = is_language_indonesian(question)
+    # is_indonesian = is_language_indonesian(question)
 
-    if is_indonesian:
-        question = translate("en", question)
+    # if is_indonesian:
+    #     question = translate("en", question)
 
     result = qa_chain({"question": question})
     answer = result['answer']
 
-    if is_indonesian:
-        answer = translate("id", answer)
+    # if is_indonesian:
+    #     answer = translate("id", answer)
 
     if is_answer_uncertain(answer):
         return answer
