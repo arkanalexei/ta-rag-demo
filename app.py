@@ -2,9 +2,12 @@ import random
 import string
 
 import streamlit as st
+
 from utils.constants import STREAMLIT_INTRO
-from utils.rag.mq_agent import caller as caller_mq_agent
 from utils.rag.basic_agent import caller as caller_basic
+from utils.rag.mq_agent import caller as caller_mq_agent
+from utils.rag.open_source.basic_agent import caller as caller_basic_os
+from utils.rag.open_source.mq_agent import caller as caller_mq_agent_os
 
 # Set the password
 PASSWORD = "rag"
@@ -42,14 +45,19 @@ else:
         st.session_state.current_response = ""
 
     # Dropdown to select the pipeline
-    pipeline_options = ["Basic", "Multi Query"]
+    pipeline_options = ["Basic Proprietary", "Multi Query Proprietary",
+                        "Basic Open Source", "Multi Query Open Source"]
     selected_pipeline = st.selectbox("Choose Pipeline", pipeline_options)
 
     # Define the caller function based on the selected pipeline
-    if selected_pipeline == "Basic":
+    if selected_pipeline == "Basic Proprietary":
         caller_function = caller_basic
-    else:
+    elif selected_pipeline == "Multi Query Proprietary":
         caller_function = caller_mq_agent
+    elif selected_pipeline == "Basic Open Source":
+        caller_function = caller_basic_os
+    else:
+        caller_function = caller_mq_agent_os
 
     # We loop through each message in the session state and render it as
     # a chat message.

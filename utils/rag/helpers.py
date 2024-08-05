@@ -39,8 +39,8 @@ def get_user_memory(user_id):
     return user_memories[user_id]
 
 
-def is_answer_uncertain(answer):
-    llm = get_llm()
+def is_answer_uncertain(answer, llm_model="gpt-4o-mini"):
+    llm = get_llm(model=llm_model)
     prompt = CERTAIN_SYSTEM_PROMPT.format(answer=answer)
     response = llm.invoke(prompt)
     return "uncertain" in response.content.lower()
