@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from langchain_community.chat_models import ChatOpenAI, ChatOllama
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings, HuggingFaceBgeEmbeddings
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,17 +17,13 @@ def get_llm(model="gpt-4o-mini"):
     return llm
 
 def get_embedding_model(model="text-embedding-3-small"):
-    api_key = os.getenv('OPENAI_API_KEY')
-
-    if not model:
-        model = "text-embedding-3-small"
-
-    embed_model = OpenAIEmbeddings(
-        api_key=api_key,
-        model=model,
-    )
-    
-    return embed_model
+    if model == "text-embedding-3-small":
+        api_key = os.getenv('OPENAI_API_KEY')
+        return OpenAIEmbeddings(api_key=api_key, model=model)
+    elif model == "BAAI/bge-m3":
+        model_kwargs = {'device': 'cpu'}
+        encode_kwargs = {'normalize_embeddings': True}
+        return HuggingFaceBgeEmbeddings(model_name=model, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs)    
 
 # Example usage
 if __name__ == "__main__":
