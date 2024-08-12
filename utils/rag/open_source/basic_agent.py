@@ -72,3 +72,15 @@ def caller(question, user_id):
 
     formatted_sources = format_sources(result['source_documents'])
     return f"{answer}\n\n\nSources:\n\n{formatted_sources}"
+
+
+def caller_with_sources(question, user_id):
+    qa_chain = get_qa_chain(user_id)
+
+    result = qa_chain({"question": question})
+    answer = result['answer']
+
+    if is_answer_uncertain(answer, llm_model="llama3.1"):
+        return answer, result["source_documents"]
+
+    return answer, result["source_documents"]
