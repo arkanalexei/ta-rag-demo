@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 *.pyo
 qdrant/
+.deepeval
+.deepeval-cache.json
