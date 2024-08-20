@@ -24,11 +24,11 @@ def get_qa_chain(user_id):
     # retriever = vectorstore.as_retriever()
 
     # Cohere Reranker
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 30})
-    compressor = FlashrankRerank(top_n=15, model="ms-marco-MultiBERT-L-12")
-    compression_retriever = ContextualCompressionRetriever(
-        base_compressor=compressor, base_retriever=retriever
-    )
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
+    # compressor = FlashrankRerank(top_n=15, model="ms-marco-MultiBERT-L-12")
+    # compression_retriever = ContextualCompressionRetriever(
+    #     base_compressor=compressor, base_retriever=retriever
+    # )
 
     # Custom prompt template
     PROMPT = PromptTemplate(
@@ -42,7 +42,7 @@ def get_qa_chain(user_id):
     # Create the conversational chain
     qa_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
-        retriever=compression_retriever,
+        retriever=retriever,
         memory=memory,
         combine_docs_chain_kwargs={
             "prompt": PROMPT,
