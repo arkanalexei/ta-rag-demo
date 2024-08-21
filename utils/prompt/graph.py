@@ -38,21 +38,28 @@ Jika seorang pengguna menanyakan apakah suatu peraturan masih relevan atau masih
 
 Example:
 PLEASE USE THIS EXAMPLE FOR YOUR THINKING AND NEVER USE IT TO ANSWER ANY QUESTIONS.
-User Query: Apakah peraturan dengan nomor XXXX masih berlaku?
+
+Example one:
+User Query: Undang Undang No XXXX Tahun YYYY mencabut peraturan apa saja?
 Generated Cypher Query:
 
 ```cypher
-MATCH (p:Peraturan {{nomor_ketentuan: 'XXXX'}})
-OPTIONAL MATCH (p)<-[:MENCABUT|MENGUBAH]-(other:Peraturan)
-OPTIONAL MATCH (p)-[:DICABUT|DIUBAH]->(newer:Peraturan)
+MATCH (p:Peraturan {{nomor: XXXX, tahun: 'YYYY', jenis_peraturan: 'UNDANG-UNDANG'}})
+MATCH (p)-[:MENCABUT]->(revoked:Peraturan)
 RETURN 
-  p AS originalRegulation, 
-  other AS replacingOrRevokingRegulation, 
-  newer AS replacedOrRevokedByRegulation,
-  CASE 
-    WHEN other IS NOT NULL OR newer IS NOT NULL THEN 'No, this regulation is no longer relevant.'
-    ELSE 'Yes, this regulation is still relevant.'
-  END AS relevanceStatus
+  p AS revokingRegulation, 
+  revoked AS revokedRegulation
+
+Example two:
+User Query: Undang Undang No XXXX Tahun YYYY dicabut peraturan apa saja?
+Generated Cypher Query:
+
+```cypher
+MATCH (p:Peraturan {{nomor: XXXX, tahun: 'YYYY', jenis_peraturan: 'UNDANG-UNDANG'}})
+MATCH (p)-[:DICABUT]->(revoked:Peraturan)
+RETURN 
+  p AS revokedRegulation, 
+  revoked AS revokingRegulation
 
 The question is:
 {question}
