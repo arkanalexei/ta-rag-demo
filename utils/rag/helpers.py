@@ -2,8 +2,9 @@ import pickle
 
 from langchain.memory import ConversationSummaryBufferMemory
 
-from utils.constants import CERTAIN_SYSTEM_PROMPT, DOCSTORE_PATH
+from utils.constants import DOCSTORE_PATH
 from utils.llm import get_llm
+from utils.prompt.main import CERTAIN_SYSTEM_PROMPT
 
 
 def format_source_link(title, file_link, page_number=None):

@@ -7,8 +7,8 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CohereRerank
 from langchain_pinecone import PineconeVectorStore
 
-from utils.constants import MAIN_SYSTEM_PROMPT
 from utils.llm import get_embedding_model, get_llm
+from utils.prompt.main import MAIN_SYSTEM_PROMPT
 from utils.rag.helpers import (format_sources, get_user_memory,
                                is_answer_uncertain)
 from utils.utils import is_language_indonesian, translate

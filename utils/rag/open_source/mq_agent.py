@@ -11,8 +11,8 @@ from langchain.retrievers.document_compressors.flashrank_rerank import \
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_qdrant import QdrantVectorStore
 
-from utils.constants import MAIN_SYSTEM_PROMPT
 from utils.llm import get_embedding_model, get_llm
+from utils.prompt.main import MAIN_SYSTEM_PROMPT
 from utils.rag.helpers import (format_sources, get_docstore, get_user_memory,
                                is_answer_uncertain)
 from utils.utils import is_language_indonesian, translate
