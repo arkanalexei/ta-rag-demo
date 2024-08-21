@@ -61,6 +61,8 @@ RETURN
   p AS revokedRegulation, 
   revoked AS revokingRegulation
 
+Note: the relationship could either be "MENCABUT", "MENGUBAH", "DIUBAH", or "DICABUT". It depends on the user query.
+
 The question is:
 {question}
 """
