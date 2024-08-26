@@ -3,12 +3,12 @@ from typing import Sequence, Union
 from langchain.chains.query_constructor.base import (
     AttributeInfo, StructuredQueryOutputParser, get_query_constructor_prompt)
 from langchain.retrievers.self_query.base import SelfQueryRetriever
+from langchain_community.document_transformers.embeddings_redundant_filter import \
+    _DocumentWithState
 from langchain_community.query_constructors.qdrant import QdrantTranslator
 from langchain_core.language_models.base import BaseLanguageModel
-from langchain_core.prompts import BasePromptTemplate
+from langchain_core.prompts import BasePromptTemplate, PromptTemplate
 from langchain_core.vectorstores import VectorStore
-
-from langchain_core.prompts import PromptTemplate
 
 DEFAULT_SCHEMA = """\
 << Structured Request Schema >>
@@ -44,6 +44,9 @@ Make sure that filters are only used as needed. If there are no filters that sho
 
 DEFAULT_SCHEMA_PROMPT = PromptTemplate.from_template(DEFAULT_SCHEMA)
 
+def to_documents(context: list[_DocumentWithState]):
+    context_unique = [i.to_document() for i in context]
+    return context_unique
 
 def self_query(llm_model: BaseLanguageModel, vector_store: VectorStore, document_content_description: str, metadata_field_info: Sequence[Union[AttributeInfo, dict]], search_type: str = "similarity", schema_prompt: BasePromptTemplate = DEFAULT_SCHEMA_PROMPT, top_k: int = 8) -> SelfQueryRetriever:
     translator = QdrantTranslator(metadata_key="metadata")
@@ -57,8 +60,6 @@ def self_query(llm_model: BaseLanguageModel, vector_store: VectorStore, document
 
     output_parser = StructuredQueryOutputParser.from_components()
     query_constructor = prompt | llm_model | output_parser
-
-    print("query_constructor", query_constructor)
 
     retriever = SelfQueryRetriever(
         query_constructor=query_constructor,
