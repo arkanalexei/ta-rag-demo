@@ -3,7 +3,7 @@ import time
 from abc import ABC, abstractmethod
 
 from langchain_core.embeddings import Embeddings
-from langchain_qdrant import QdrantVectorStore
+from langchain_community.vectorstores import Qdrant
 from qdrant_client import QdrantClient
 
 
@@ -55,7 +55,7 @@ class QdrantIndexManager(VectorIndexManager):
 
         # Load or create the vector store in Qdrant
         if start_split_idx < batch_size:
-            self.vector_store = QdrantVectorStore.from_texts(
+            self.vector_store = Qdrant.from_texts(
                 texts=[doc.page_content for doc in docs[0:batch_size]],
                 embedding=self.embed_model,
                 metadatas=[doc.metadata for doc in docs[0:batch_size]],
@@ -70,7 +70,7 @@ class QdrantIndexManager(VectorIndexManager):
             print(f"Loaded 1-{last_split_idx} documents")
             start_split_idx = batch_size
         else:
-            self.vector_store = QdrantVectorStore.from_existing_collection(
+            self.vector_store = Qdrant.from_existing_collection(
                 collection_name=self.index_name,
                 embedding=self.embed_model,
                 url=self.url
@@ -92,7 +92,8 @@ class QdrantIndexManager(VectorIndexManager):
     def load_vector_index(self):
         try:
             # Load the existing vector index from Qdrant
-            self.vector_store = QdrantVectorStore.from_existing_collection(
+            self.vector_store = Qdrant.from_existing_collection(
+                path=None,
                 collection_name=self.index_name,
                 embedding=self.embed_model,
                 url=self.url
