@@ -13,14 +13,7 @@ from utils.retriever.self_query import to_documents
 from utils.retriever.uu.self_query_uu import self_query_uu
 
 
-def get_retriever_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_model: Embeddings, top_k: int = 8, config: dict = {}, with_self_query: bool = True):
-
-    retriever_self_query_similarity = self_query_uu(
-        llm=llm,
-        vector_store=vector_store,
-        search_type="similarity",
-    )
-
+def get_embedding_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_model: Embeddings, top_k: int = 8, with_self_query: bool = True):
     retriever_self_query_mmr = self_query_uu(
         llm=llm,
         vector_store=vector_store,
@@ -50,6 +43,5 @@ def get_retriever_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_mo
     )
 
     chain = compression_retriever | RunnableLambda(to_documents)
-
 
     return chain

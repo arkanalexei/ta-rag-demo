@@ -1,8 +1,9 @@
 import os
 
 from dotenv import load_dotenv
-from langchain_community.chat_models import ChatOpenAI, ChatOllama
 from langchain_community.embeddings import OpenAIEmbeddings, HuggingFaceBgeEmbeddings
+from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 
 # Load environment variables from .env file
 load_dotenv()
@@ -12,7 +13,7 @@ def get_llm(model="gpt-4o-mini"):
         api_key = os.getenv('OPENAI_API_KEY')
         return ChatOpenAI(api_key=api_key, model=model, temperature=0.1)
     elif model == "llama3.1":
-        return ChatOllama(model=model, temperature=0.1)
+        return ChatOllama(model=model, temperature=0.1, num_ctx=16384)
     
     return llm
 
