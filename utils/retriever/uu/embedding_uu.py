@@ -36,8 +36,8 @@ def get_embedding_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_mo
 
     # remove redundant documents
     filter = EmbeddingsRedundantFilter(embeddings=embed_model)
-    # reordering = LongContextReorder()
-    pipeline = DocumentCompressorPipeline(transformers=[filter])
+    reordering = LongContextReorder()
+    pipeline = DocumentCompressorPipeline(transformers=[filter, reordering])
     compression_retriever = ContextualCompressionRetriever(
         base_compressor=pipeline, base_retriever=lotr
     )
