@@ -8,6 +8,7 @@ from langchain.retrievers.document_compressors.flashrank_rerank import \
     FlashrankRerank
 from langchain_qdrant import QdrantVectorStore
 
+from utils.database.qdrant import QdrantIndexManager
 from utils.llm import get_embedding_model, get_llm
 from utils.prompt.main import MAIN_SYSTEM_PROMPT
 from utils.rag.helpers import (format_sources, get_user_memory,
@@ -15,21 +16,12 @@ from utils.rag.helpers import (format_sources, get_user_memory,
 from utils.utils import is_language_indonesian, translate
 
 
+llm = get_llm(model="llama3.1")
+embed_model = get_embedding_model(model="BAAI/bge-m3")
+vectorstore = QdrantIndexManager(embed_model=embed_model, index_name="uu").load_vector_index()
+retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
+
 def get_qa_chain(user_id):
-    llm = get_llm(model="llama3.1")
-    embed_model = get_embedding_model(model="BAAI/bge-m3")
-
-    # Initialize OpenAI and Pinecone
-    vectorstore = QdrantVectorStore.from_existing_collection(collection_name="uu", embedding=embed_model, path="qdrant")
-    # retriever = vectorstore.as_retriever()
-
-    # Cohere Reranker
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
-    # compressor = FlashrankRerank(top_n=15, model="ms-marco-MultiBERT-L-12")
-    # compression_retriever = ContextualCompressionRetriever(
-    #     base_compressor=compressor, base_retriever=retriever
-    # )
-
     # Custom prompt template
     PROMPT = PromptTemplate(
         input_variables=["context", "chat_history", "question"],
@@ -37,7 +29,7 @@ def get_qa_chain(user_id):
     )
 
     # Get or create the user's memory
-    memory = get_user_memory(user_id)
+    memory = get_user_memory(user_id, llm)
 
     # Create the conversational chain
     qa_chain = ConversationalRetrievalChain.from_llm(
@@ -49,7 +41,7 @@ def get_qa_chain(user_id):
             "document_variable_name": "context",
             },
         return_source_documents=True,
-        max_tokens_limit=4000
+        max_tokens_limit=16384
     )
     return qa_chain
 
@@ -80,7 +72,7 @@ def caller_with_sources(question, user_id):
     result = qa_chain({"question": question})
     answer = result['answer']
 
-    if is_answer_uncertain(answer, llm_model="llama3.1"):
-        return answer, result["source_documents"]
+    # if is_answer_uncertain(answer, llm_model="llama3.1"):
+    #     return answer, result["source_documents"]
 
     return answer, result["source_documents"]

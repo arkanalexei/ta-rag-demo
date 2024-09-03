@@ -44,7 +44,7 @@ User Query: Undang Undang No XXXX Tahun YYYY mencabut peraturan apa saja?
 Generated Cypher Query:
 
 ```cypher
-MATCH (p:Peraturan {{nomor: XXXX, tahun: 'YYYY', jenis_peraturan: 'UNDANG-UNDANG'}})
+MATCH (p:Peraturan {{nomor: XXXX, tahun: YYYY, jenis_peraturan: 'UNDANG-UNDANG'}})
 MATCH (p)-[:MENCABUT]->(revoked:Peraturan)
 RETURN 
   p AS revokingRegulation, 
@@ -55,7 +55,7 @@ User Query: Undang Undang No XXXX Tahun YYYY dicabut peraturan apa saja?
 Generated Cypher Query:
 
 ```cypher
-MATCH (p:Peraturan {{nomor: XXXX, tahun: 'YYYY', jenis_peraturan: 'UNDANG-UNDANG'}})
+MATCH (p:Peraturan {{nomor: XXXX, tahun: YYYY, jenis_peraturan: 'UNDANG-UNDANG'}})
 MATCH (p)-[:DICABUT]->(revoked:Peraturan)
 RETURN 
   p AS revokedRegulation, 

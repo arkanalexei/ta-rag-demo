@@ -1,7 +1,9 @@
 from langchain.retrievers import (ContextualCompressionRetriever,
                                   MergerRetriever)
+from langchain.retrievers.document_compressors import CrossEncoderReranker
 from langchain.retrievers.document_compressors.base import \
     DocumentCompressorPipeline
+from langchain_community.cross_encoders.huggingface import HuggingFaceCrossEncoder
 from langchain_community.document_transformers import (
     EmbeddingsRedundantFilter, LongContextReorder)
 from langchain_core.embeddings import Embeddings
@@ -34,12 +36,19 @@ def get_embedding_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_mo
     if with_self_query:
         lotr = MergerRetriever(retrievers=[retriever_self_query_mmr, retriever_similarity])
 
+    # reranker
+    model = HuggingFaceCrossEncoder(model_name="BAAI/bge-reranker-v2-m3")
+    cross_encoder_compressor = CrossEncoderReranker(model=model, top_n=top_k)
+    reranked_retriever = ContextualCompressionRetriever(
+        base_compressor=cross_encoder_compressor, base_retriever=lotr
+    )
+
     # remove redundant documents
     filter = EmbeddingsRedundantFilter(embeddings=embed_model)
-    # reordering = LongContextReorder()
-    pipeline = DocumentCompressorPipeline(transformers=[filter])
+    reordering = LongContextReorder()
+    pipeline = DocumentCompressorPipeline(transformers=[filter, reordering])
     compression_retriever = ContextualCompressionRetriever(
-        base_compressor=pipeline, base_retriever=lotr
+        base_compressor=pipeline, base_retriever=reranked_retriever
     )
 
     chain = compression_retriever | RunnableLambda(to_documents)

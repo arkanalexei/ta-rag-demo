@@ -28,9 +28,8 @@ def format_sources(source_documents):
 
 user_memories = {}
 
-def get_user_memory(user_id):
+def get_user_memory(user_id, llm):
     if user_id not in user_memories:
-        llm = get_llm()
         user_memories[user_id] = ConversationSummaryBufferMemory(
             llm=llm,
             memory_key="chat_history",

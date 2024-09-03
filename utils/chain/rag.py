@@ -71,7 +71,7 @@ def create_combined_answer_chain(retriever_uu: BaseRetriever, graph_chain: Graph
         "result": question_router | StrOutputParser(),
         "question": RunnablePassthrough(),
     } | RunnablePassthrough() | RunnableBranch(
-        (lambda x: "rekam_jejak" in x["result"], uu_rekam_chain),
+        (lambda x: "rekam_jejak" in x["result"], ketentuan_chain), # for now disable rekam chain (change to uu_rekam_chain)
         (lambda x: "ketentuan_terkait" in x["result"], ketentuan_chain),
         general_chain,
     )
