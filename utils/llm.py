@@ -1,7 +1,9 @@
 import os
 
 from dotenv import load_dotenv
-from langchain_community.embeddings import OpenAIEmbeddings, HuggingFaceBgeEmbeddings
+from langchain_community.embeddings import (HuggingFaceBgeEmbeddings,
+                                            OpenAIEmbeddings)
+from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 
@@ -14,6 +16,13 @@ def get_llm(model="gpt-4o-mini"):
         return ChatOpenAI(api_key=api_key, model=model, temperature=0.1)
     elif model == "llama3.1":
         return ChatOllama(model=model, temperature=0.1, num_ctx=16384)
+    elif model == "nvidia-llama3.1":
+        return ChatNVIDIA(
+            base_url="http://localhost:8000/v1",
+            model="meta/llama-3.1-8b-instruct",
+            temperature=0,
+            max_tokens=16000
+        )
     
     return llm
 
