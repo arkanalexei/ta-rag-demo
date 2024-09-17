@@ -71,6 +71,7 @@ class QdrantIndexManager(VectorIndexManager):
             start_split_idx = batch_size
         else:
             self.vector_store = Qdrant.from_existing_collection(
+		path=None,
                 collection_name=self.index_name,
                 embedding=self.embed_model,
                 url=self.url
