@@ -16,11 +16,11 @@ from utils.retriever.uu.self_query_uu import self_query_uu
 
 
 def get_embedding_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_model: Embeddings, top_k: int = 8, with_self_query: bool = True):
-    retriever_self_query_mmr = self_query_uu(
-        llm=llm,
-        vector_store=vector_store,
-        search_type="mmr",
-    )
+    #retriever_self_query_mmr = self_query_uu(
+    #    llm=llm,
+    #    vector_store=vector_store,
+    #    search_type="mmr",
+    #)
 
     retriever_similarity = vector_store.as_retriever(
         search_type="similarity",

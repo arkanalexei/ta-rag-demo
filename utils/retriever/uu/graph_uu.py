@@ -18,7 +18,7 @@ def get_graph_uu(llm: BaseLanguageModel, config: dict):
     cypher_generation_prompt = PromptTemplate(input_variables=["schema", "question"], template=cypher_generation_template)
 
     chain = GraphCypherQAChain.from_llm(
-        cypher_llm=llm, qa_llm=llm, graph=graph, verbose=True, validate_cypher=True, qa_prompt=qa_generation_prompt, cypher_prompt=cypher_generation_prompt
+        cypher_llm=llm, qa_llm=llm, graph=graph, verbose=True, validate_cypher=True, qa_prompt=qa_generation_prompt, cypher_prompt=cypher_generation_prompt, allow_dangerous_requests=True
     )
 
     return chain
