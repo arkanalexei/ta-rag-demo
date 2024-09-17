@@ -30,12 +30,12 @@ def load_resources():
 
     # Load the graph chain
     config = get_config()
-    graph_chain = get_graph_uu(llm=llm, config=config)
+    # graph_chain = get_graph_uu(llm=llm, config=config)
 
     # Create the final RAG chain
     chain_quality = create_combined_answer_chain(
         retriever_uu=retriever_uu,
-        graph_chain=graph_chain,
+        # graph_chain=graph_chain,
         llm=llm
     )
 
