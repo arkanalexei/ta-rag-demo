@@ -27,19 +27,22 @@ def merge_answer(results):
 
 # TODO: parameters retriever_uu: BaseRetriever, graph_chain: GraphCypherQAChain, llm: BaseLanguageModel
 def create_combined_answer_chain(retriever_uu: BaseRetriever, llm: BaseLanguageModel):
+    print("A")
     CONTEXTUALIZE_Q_PROMPT = PromptTemplate.from_template(
         CONTEXTUALIZE_Q_PROMPT_STR)
     _inputs_question = CONTEXTUALIZE_Q_PROMPT | llm | StrOutputParser()
+    print("B")
 
     question_router = question_router_chain(llm, ROUTER_PROMPT)
     QA_SYSTEM_PROMPT = PromptTemplate(input_variables=[
                                       "answer_uu", "question"], template=QA_SYSTEM_TEMPLATE_COMBINED_ANSWER)
-    
+    print("C")
     uu_chain = create_uu_chain(
         qa_system_prompt_str=QA_SYSTEM_PROMPT_UU,
         retriever=retriever_uu,
         llm=llm
     )
+    print("D")
 
     # uu_rekam_chain = create_uu_rekam_chain(
     #     qa_system_prompt_str=QA_SYSTEM_PROMPT_UU,
@@ -52,6 +55,7 @@ def create_combined_answer_chain(retriever_uu: BaseRetriever, llm: BaseLanguageM
     general_chain = PromptTemplate.from_template(
         """Answer 'Saya tidak tahu' """
     ) | llm | StrOutputParser()
+    print("E")
 
     ketentuan_chain = RunnablePassthrough() | {"question": itemgetter("question")} | {
         "chain_uu":   uu_chain,
@@ -66,6 +70,7 @@ def create_combined_answer_chain(retriever_uu: BaseRetriever, llm: BaseLanguageM
         "context_text": RunnableLambda(merge_answer),
         "answer":   QA_SYSTEM_PROMPT | llm | StrOutputParser()
     }
+    print("F")
 
     full_chain = _inputs_question | {
         "result": question_router | StrOutputParser(),
@@ -75,5 +80,6 @@ def create_combined_answer_chain(retriever_uu: BaseRetriever, llm: BaseLanguageM
         (lambda x: "ketentuan_terkait" in x["result"], ketentuan_chain),
         general_chain,
     )
+    print("G")
 
     return full_chain
