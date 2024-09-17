@@ -51,8 +51,6 @@ def ask_question(request: QuestionRequest):
         })
 
         print("result", result)
-        answer = json.dumps(result['answer'], default=str)
-        return {"answer": answer}
 
         # Return the answer from the RAG pipeline
         return {"answer": result['answer']}

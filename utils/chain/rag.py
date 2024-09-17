@@ -25,8 +25,8 @@ def merge_answer(results):
     merged = [results["answer_uu"]]
     return merged
 
-
-def create_combined_answer_chain(retriever_uu: BaseRetriever, graph_chain: GraphCypherQAChain, llm: BaseLanguageModel):
+# TODO: parameters retriever_uu: BaseRetriever, graph_chain: GraphCypherQAChain, llm: BaseLanguageModel
+def create_combined_answer_chain(retriever_uu: BaseRetriever, llm: BaseLanguageModel):
     CONTEXTUALIZE_Q_PROMPT = PromptTemplate.from_template(
         CONTEXTUALIZE_Q_PROMPT_STR)
     _inputs_question = CONTEXTUALIZE_Q_PROMPT | llm | StrOutputParser()
@@ -41,13 +41,13 @@ def create_combined_answer_chain(retriever_uu: BaseRetriever, graph_chain: Graph
         llm=llm
     )
 
-    uu_rekam_chain = create_uu_rekam_chain(
-        qa_system_prompt_str=QA_SYSTEM_PROMPT_UU,
-        llm=llm,
-        rekam_jejak_context=REKAM_JEJAK_CONTEXT,
-        graph_chain=graph_chain,
-        retriever=retriever_uu,
-    )
+    # uu_rekam_chain = create_uu_rekam_chain(
+    #     qa_system_prompt_str=QA_SYSTEM_PROMPT_UU,
+    #     llm=llm,
+    #     rekam_jejak_context=REKAM_JEJAK_CONTEXT,
+    #     graph_chain=graph_chain,
+    #     retriever=retriever_uu,
+    # )
 
     general_chain = PromptTemplate.from_template(
         """Answer 'Saya tidak tahu' """
