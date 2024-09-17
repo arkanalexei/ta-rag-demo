@@ -20,7 +20,7 @@ def get_llm(model="gpt-4o-mini"):
         return ChatNVIDIA(
             base_url="http://localhost:8000/v1",
             model="meta/llama-3.1-8b-instruct",
-            temperature=0,
+            temperature=0.1,
             max_tokens=16000
         )
     
