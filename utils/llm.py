@@ -33,7 +33,7 @@ def get_embedding_model(model="text-embedding-3-small"):
     elif model == "BAAI/bge-m3":
         model_kwargs = {'device': 'cuda'}
         encode_kwargs = {'normalize_embeddings': True}
-        return HuggingFaceBgeEmbeddings(model_name=model, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs)    
+        return HuggingFaceBgeEmbeddings(model_name=model, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs)
 
 # Example usage
 if __name__ == "__main__":
