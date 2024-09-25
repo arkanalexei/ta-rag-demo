@@ -51,7 +51,6 @@ def create_combined_answer_chain(retriever_uu: BaseRetriever, graph_chain: Graph
     general_chain = PromptTemplate.from_template(
         """Answer 'Saya tidak tahu' """
     ) | llm | StrOutputParser()
-    print("E")
 
     ketentuan_chain = RunnablePassthrough() | {"question": itemgetter("question")} | {
         "chain_uu":   uu_chain,
@@ -66,16 +65,14 @@ def create_combined_answer_chain(retriever_uu: BaseRetriever, graph_chain: Graph
         "context_text": RunnableLambda(merge_answer),
         "answer":   QA_SYSTEM_PROMPT | llm | StrOutputParser()
     }
-    print("F")
 
     full_chain = _inputs_question | {
         "result": question_router | StrOutputParser(),
         "question": RunnablePassthrough(),
     } | RunnablePassthrough() | RunnableBranch(
-        (lambda x: "rekam_jejak" in x["result"], uu_rekam_chain), # for now disable rekam chain (change to uu_rekam_chain)
+        (lambda x: "rekam_jejak" in x["result"], uu_rekam_chain),
         (lambda x: "ketentuan_terkait" in x["result"], ketentuan_chain),
         general_chain,
     )
-    print("G")
 
     return full_chain
