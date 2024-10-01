@@ -6,6 +6,7 @@ from langchain_community.embeddings import (HuggingFaceBgeEmbeddings,
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
+from langchain_huggingface import HuggingFacePipeline
 
 # Load environment variables from .env file
 load_dotenv()
@@ -24,7 +25,23 @@ def get_llm(model="gpt-4o-mini"):
             max_tokens=16000
         )
     
-    return llm
+    elif model == "hf-llama3.2":
+        model = "meta-llama/Llama-3.2-3B-Instruct"
+
+        llm = HuggingFacePipeline.from_model_id(
+        model_id=model,
+        task="text-generation",
+        device=0,
+        pipeline_kwargs=dict(
+            temperature=0.1,
+            max_length=16000,
+        ),
+        )
+        llm.pipeline.tokenizer.pad_token_id = llm.pipeline.tokenizer.eos_token_id
+        
+        return llm
+    
+    return None
 
 def get_embedding_model(model="text-embedding-3-small"):
     if model == "text-embedding-3-small":
