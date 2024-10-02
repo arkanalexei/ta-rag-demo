@@ -1,5 +1,5 @@
-from langchain.retrievers import (ContextualCompressionRetriever,
-                                  MergerRetriever)
+from langchain.retrievers.merger_retriever import MergerRetriever
+from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CrossEncoderReranker
 from langchain.retrievers.document_compressors.base import \
     DocumentCompressorPipeline

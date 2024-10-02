@@ -6,7 +6,7 @@ from langchain_community.embeddings import (HuggingFaceBgeEmbeddings,
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
-from langchain_huggingface import HuggingFacePipeline
+from langchain_huggingface import HuggingFacePipeline, ChatHuggingFace
 
 # Load environment variables from .env file
 load_dotenv()
@@ -31,7 +31,7 @@ def get_llm(model="gpt-4o-mini"):
         llm = HuggingFacePipeline.from_model_id(
         model_id=model,
         task="text-generation",
-        device=0,
+        device=2,
         pipeline_kwargs=dict(
             temperature=0.1,
             max_length=16000,
@@ -39,7 +39,7 @@ def get_llm(model="gpt-4o-mini"):
         )
         llm.pipeline.tokenizer.pad_token_id = llm.pipeline.tokenizer.eos_token_id
         
-        return llm
+        return ChatHuggingFace(llm=llm)
     
     return None
 
