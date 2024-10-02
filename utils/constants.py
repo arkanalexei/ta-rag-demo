@@ -3,6 +3,7 @@ OCR_CONFIDENCE_THRESHOLD = 0.90
 DOCSTORE_PATH = "pickles/docstore.pkl"
 
 CHROMEDRIVER_PATH="chromedriver/chromedriver.exe"
+CHROMEDRIVER_DESKTOP_PATH="chromedriver/chromedriver_desktop.exe"
 
 UU_REGULATIONS_CSV="csv/uu/regulations.csv"
 UU_REGULATION_DETAILS_CSV="csv/uu/regulation_details.csv"

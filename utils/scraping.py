@@ -4,6 +4,8 @@ import requests
 import string
 
 def slugify(input_string):
+    if isinstance(input_string, float):
+        return "unknown"
     normalized_string = re.sub(r'\W+', '_', input_string)
     normalized_string = normalized_string.lower()
     return normalized_string
