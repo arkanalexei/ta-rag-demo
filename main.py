@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     llm = get_llm("nvidia-llama3.1")
     embed_model = get_embedding_model("BAAI/bge-m3")
 
-    vector_store = QdrantIndexManager(embed_model=embed_model, index_name="uu").load_vector_index()
+    vector_store = QdrantIndexManager(embed_model=embed_model, index_name="uu-all").load_vector_index()
     retriever_uu = get_embedding_uu(vector_store=vector_store, llm=llm, embed_model=embed_model, with_self_query=False)
 
     config = get_config()
