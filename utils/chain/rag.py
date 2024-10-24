@@ -67,12 +67,7 @@ def create_combined_answer_chain(retriever_uu: BaseRetriever, graph_chain: Graph
     }
 
     full_chain = _inputs_question | {
-        "result": question_router | StrOutputParser(),
         "question": RunnablePassthrough(),
-    } | RunnablePassthrough() | RunnableBranch(
-        (lambda x: "rekam_jejak" in x["result"], uu_rekam_chain),
-        (lambda x: "ketentuan_terkait" in x["result"], ketentuan_chain),
-        general_chain,
-    )
+    } | RunnablePassthrough() | uu_rekam_chain
 
     return full_chain
