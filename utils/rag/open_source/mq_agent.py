@@ -22,7 +22,7 @@ def get_qa_chain(user_id):
     llm = get_llm(model="llama3.1")
     embed_model = get_embedding_model(model="BAAI/bge-m3")
 
-    vectorstore = QdrantVectorStore.from_existing_collection(collection_name="uu", embedding=embed_model, path="qdrant")
+    vectorstore = QdrantVectorStore.from_existing_collection(collection_name="uu-all", embedding=embed_model, path="qdrant")
 
     multi_query_retriever = MultiQueryRetriever.from_llm(
         retriever=vectorstore.as_retriever(search_kwargs={"k": 10}),

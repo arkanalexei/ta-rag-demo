@@ -18,7 +18,7 @@ from utils.utils import is_language_indonesian, translate
 
 llm = get_llm(model="llama3.1")
 embed_model = get_embedding_model(model="BAAI/bge-m3")
-vectorstore = QdrantIndexManager(embed_model=embed_model, index_name="uu").load_vector_index()
+vectorstore = QdrantIndexManager(embed_model=embed_model, index_name="uu-all").load_vector_index()
 retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
 
 def get_qa_chain(user_id):

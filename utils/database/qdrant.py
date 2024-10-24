@@ -8,7 +8,7 @@ from qdrant_client import QdrantClient
 
 
 class VectorIndexManager(ABC):
-    def __init__(self, embed_model, index_name="uu"):
+    def __init__(self, embed_model, index_name="uu-all"):
         self.embed_model = embed_model
         self.index_name = index_name
         self.vector_store = None
@@ -26,7 +26,7 @@ class VectorIndexManager(ABC):
         pass
     
 class QdrantIndexManager(VectorIndexManager):
-    def __init__(self, embed_model: Embeddings, index_name="uu", url="http://localhost:6333"):
+    def __init__(self, embed_model: Embeddings, index_name="uu-all", url="http://localhost:6333"):
         super().__init__(embed_model, index_name)
         self.url = url
         self.client = QdrantClient(url=url)
