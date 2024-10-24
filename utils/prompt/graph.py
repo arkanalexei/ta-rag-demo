@@ -63,6 +63,8 @@ RETURN
 
 Note: the relationship could either be "MENCABUT", "MENGUBAH", "DIUBAH", or "DICABUT". It depends on the user query.
 
+Lastly, ALWAYS end the generated Cypher statement with a RETURN clause, a FINISH clause, an update clause, a unit subquery call, or a procedure call with no YIELD. Do NOT conclude the Cypher statement with a MATCH clause.
+
 The question is:
 {question}
 """
