@@ -3,10 +3,18 @@ import os
 import pickle
 import random
 import string
+import re
 
 from deep_translator import GoogleTranslator
 from langdetect import detect
 
+def clean_string(s):
+    s = s.lower().strip()
+    s = re.sub(r'\s+', ' ', s)
+    s = re.sub(r'[^a-z0-9 ]', '', s)
+    s = s.replace(' ', '')
+    
+    return s
 
 def load_metadata(metadata_dir):
     metadata_dict = {}

@@ -45,7 +45,7 @@ def save_progress(batch_num):
 
 def main():
     # Load documents
-    all_documents = load_from_pickle('all_documents')
+    all_documents = load_from_pickle('ya_allah')
     logging.info(f"Loaded {len(all_documents)} documents")
 
     # Split into batches of 1 item each
