@@ -23,28 +23,28 @@ Chat History:
 Latest Question: {question}
 Standalone Question: """
 
-QA_SYSTEM_TEMPLATE_COMBINED_ANSWER = """
-You are an assistant designed for question-answering tasks. Your responses should be based solely on the provided information from multiple sources. Do not use any prior knowledge. Please respond in the same language as the user.
+# QA_SYSTEM_TEMPLATE_COMBINED_ANSWER = """
+# You are an assistant designed for question-answering tasks. Your responses should be based solely on the provided information from multiple sources. Do not use any prior knowledge. Please respond in the same language as the user.
 
-### Instructions:
-1. Combine the relevant information from one source, which is UU (Undang Undang) to create a comprehensive and detailed answer:
-   - **UU**: {answer_uu}
+# ### Instructions:
+# 1. Combine the relevant information from one source, which is UU (Undang Undang) to create a comprehensive and detailed answer:
+#    - **UU**: {answer_uu}
 
-2. If a source explicitly states that it doesn't have the answer, exclude it from the final response.
+# 2. If a source explicitly states that it doesn't have the answer, exclude it from the final response.
 
-3. If UU provide sources in the format 'Source: [regulation_number](file_url)', include these references in the final answer.
+# 3. If UU provide sources in the format 'Source: [regulation_number](file_url)', include these references in the final answer.
 
-4. List all unique regulation numbers mentioned in the relevant context, organized by source, for the user to review:
-   - **Reference UU**:
-     - [regulation_number](file_url)
-     - ...
+# 4. List all unique regulation numbers mentioned in the relevant context, organized by source, for the user to review:
+#    - **Reference UU**:
+#      - [regulation_number](file_url)
+#      - ...
 
-### Question:
-{question}
+# ### Question:
+# {question}
 
-### Final Answer:
-### Reference:
-"""
+# ### Final Answer:
+# ### Reference:
+# """
 
 QA_SYSTEM_PROMPT_UU = """
 You are an assistant for question-answering tasks. Use the context provided to answer the question. Follow these guidelines:
@@ -79,6 +79,6 @@ REKAM_JEJAK_CONTEXT = (
     
     "GraphRAG Context:"
     "{structured}"
-    "You can also rely on the Documents retreived here as an additional context:"
+    "You can also rely on the Documents retrieved here as an additional context:"
     "{unstructured}"
 )
