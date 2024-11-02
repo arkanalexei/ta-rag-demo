@@ -15,13 +15,7 @@ from utils.retriever.self_query import to_documents
 from utils.retriever.uu.self_query_uu import self_query_uu
 
 
-def get_embedding_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_model: Embeddings, top_k: int = 8, with_self_query: bool = True):
-    #retriever_self_query_mmr = self_query_uu(
-    #    llm=llm,
-    #    vector_store=vector_store,
-    #    search_type="mmr",
-    #)
-
+def get_embedding_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_model: Embeddings, top_k: int = 8):
     retriever_similarity = vector_store.as_retriever(
         search_type="similarity",
         search_kwargs={'k': top_k}
@@ -32,9 +26,6 @@ def get_embedding_uu(vector_store: VectorStore, llm: BaseLanguageModel, embed_mo
     )
 
     lotr = retriever_mmr
-    # merge retrievers
-    if with_self_query:
-        lotr = MergerRetriever(retrievers=[retriever_self_query_mmr, retriever_similarity])
 
     # reranker
     model = HuggingFaceCrossEncoder(model_name="BAAI/bge-reranker-v2-m3")
