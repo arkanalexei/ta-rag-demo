@@ -9,6 +9,9 @@ from utils.database.qdrant import QdrantIndexManager
 from utils.llm import get_embedding_model, get_llm
 from utils.retriever.uu.embedding_uu import get_embedding_uu
 from utils.retriever.uu.graph_uu import get_graph_uu
+from utils.utils import set_gpu
+
+set_gpu(1)
 
 app = FastAPI()
 

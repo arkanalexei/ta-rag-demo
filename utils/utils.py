@@ -4,6 +4,7 @@ import pickle
 import random
 import string
 import re
+import torch
 
 from deep_translator import GoogleTranslator
 from langdetect import detect
@@ -54,6 +55,9 @@ def load_from_pickle(filename):
     file = open(f'pickles/{filename}.pkl','rb')
     return pickle.load(file)
 
-
 def generate_id():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8)).lower()
+
+def set_gpu(gpu):
+    torch.cuda.set_device(gpu)
+    print(f"Set GPU to {gpu}")
