@@ -23,30 +23,8 @@ Chat History:
 Latest Question: {question}
 Standalone Question: """
 
-# QA_SYSTEM_TEMPLATE_COMBINED_ANSWER = """
-# You are an assistant designed for question-answering tasks. Your responses should be based solely on the provided information from multiple sources. Do not use any prior knowledge. Please respond in the same language as the user.
 
-# ### Instructions:
-# 1. Combine the relevant information from one source, which is UU (Undang Undang) to create a comprehensive and detailed answer:
-#    - **UU**: {answer_uu}
-
-# 2. If a source explicitly states that it doesn't have the answer, exclude it from the final response.
-
-# 3. If UU provide sources in the format 'Source: [regulation_number](file_url)', include these references in the final answer.
-
-# 4. List all unique regulation numbers mentioned in the relevant context, organized by source, for the user to review:
-#    - **Reference UU**:
-#      - [regulation_number](file_url)
-#      - ...
-
-# ### Question:
-# {question}
-
-# ### Final Answer:
-# ### Reference:
-# """
-
-QA_SYSTEM_PROMPT_UU = """
+QA_SYSTEM_PROMPT_UU_ZEROSHOT = """
 You are an assistant for question-answering tasks. Use the context provided to answer the question. Follow these guidelines:
 
 1. **Language**: Respond with user query language, it should be either English or Indonesian.
@@ -70,15 +48,106 @@ You are an assistant for question-answering tasks. Use the context provided to a
 - [regulation_number](file_url)
 """
 
-REKAM_JEJAK_CONTEXT = (
-    "You will be provided with two sources of context: one from GraphRAG and one from RAG (which contains several Documents)."
-    "Your task is to combine the results from these two contexts effectively. However, prioritize the context from GraphRAG if it is not empty."
-    "If the context from GraphRAG is empty, then you should retrieve fully from the context provided by RAG."
+QA_SYSTEM_PROMPT_UU_FEWSHOT = """
+You are an assistant for question-answering tasks. Use the context provided to answer the question. Follow these guidelines:
 
-    "If GraphRAG context provides information about a topic but is missing some details, supplement it with additional details from the RAG context."
+1. **Language**: Respond in the user's query language, either English or Indonesian.
+2. **Regulation References**: 
+   - If the question relates to regulations, include detailed regulation numbers and explain the content of each regulation.
+3. **Context Relevance**: 
+   - Do not generate an answer from your own knowledge if the context is irrelevant.
+   - Even if the context is only slightly related, **always mention** all relevant regulation numbers and explain the content.
+4. **Sources**:
+   - Please detail the sources from the context that you use to generate the answer. List **all unique** "regulation_number" from the context.
+
+### Example Output 1
+**Context**: You will be provided with two sources of context: one from GraphRAG and one from RAG (which contains several Documents). Prioritize the context from GraphRAG if it contains relevant information. If the context from GraphRAG is empty, then retrieve fully from the context provided by RAG. If GraphRAG provides partial information, supplement it with additional details from the RAG context.
+
+GraphRAG Context: ['question': 'Apa ibukota DKI Jakarta', 'query': 'Apa ibukota DKI Jakarta', 'result': 'Maaf, saya tidak menemukan informasi tentang ibukota DKI Jakarta dalam hasil kueri Cypher.']
+You can also rely on the Documents retrieved here as an additional context:
+[Document(metadata=['title': 'Undang-undang Nomor 29 Tahun 2007', 'dokumen_peraturan': 'https://peraturan.go.id/files/uu29-2007.pdf', 'id': 'squi5dp2', 'filename': 'uu_30_juli_2007_uu29_2007_squi5dp2.pdf', 'page_number': 6, 'content': 'Jakarta sebagai Ibukota Negara Kesatuan Republik Indonesia ditetapkan...' ])]
+
+**Question**: Apa ibukota DKI Jakarta
+
+[**Answer**]: Ibukota DKI Jakarta adalah Jakarta. Berdasarkan Undang-Undang Nomor 29 Tahun 2007, Jakarta memiliki status sebagai ibukota Negara Kesatuan Republik Indonesia.
+
+[**Sources**]:
+- [Undang-Undang Nomor 29 Tahun 2007](https://peraturan.go.id/files/uu29-2007.pdf#page=6)
+
+### Example Output 2
+**Context**: You will be provided with two sources of context: one from GraphRAG and one from RAG (which contains several Documents). Prioritize the context from GraphRAG if it contains relevant information. If the context from GraphRAG is empty, then retrieve fully from the context provided by RAG. If GraphRAG provides partial information, supplement it with additional details from the RAG context.
+
+GraphRAG Context: ['question': 'UU No 81 Tahun 1958 mencabut UU apa saja?', 'query': 'UU No 81 Tahun 1958 mencabut UU apa saja?', 'result': 'Pertanyaan Anda tentang UU No 81 Tahun 1958 yang mencabut UU apa saja. Berdasarkan hasil kueri Cypher, saya dapat memberikan jawaban sebagai berikut:\n\nUU No 81 Tahun 1958 mencabut UU No 2 Tahun 1954 tentang Kedudukan Keuangan Ketua, Wakil Ketua, dan Anggota Dewan Perwakilan Rakyat, serta UU No 16 Tahun 1958 tentang Pengubahan dan Penambahan UU No 2 Tahun 1954 tentang Kedudukan Keuangan Ketua, Wakil Ketua, dan Anggota Dewan Perwakilan Rakyat.']
+You can also rely on the Documents retrieved here as an additional context:
+[Document(metadata=['title': 'Undang-undang Nomor 81 Tahun 1958', 'dokumen_peraturan': 'https://peraturan.go.id/files/uu81-1958.pdf', 'id': 'q0niddlx', 'filename': 'uu_unknown_uu81_1958_q0niddlx.pdf', 'page_number': 1, 'content': 'Undang-Undang Nomor 81 Tahun 1958 mencabut...' ])]
+
+**Question**: UU No 81 Tahun 1958 mencabut UU apa saja?
+
+[**Answer**]: UU No 81 Tahun 1958 mencabut UU No 2 Tahun 1954 tentang Kedudukan Keuangan Ketua, Wakil Ketua, dan Anggota Dewan Perwakilan Rakyat, serta UU No 16 Tahun 1958 tentang Pengubahan dan Penambahan UU No 2 Tahun 1954 tentang Kedudukan Keuangan Ketua, Wakil Ketua, dan Anggota Dewan Perwakilan Rakyat.
+
+[**Sources**]:
+- [UU No 2 Tahun 1954 tentang Kedudukan Keuangan Ketua, Wakil Ketua, dan Anggota Dewan Perwakilan Rakyat](https://peraturan.go.id/id/uu-no-2-tahun-1954)
+- [UU No 16 Tahun 1958 tentang Pengubahan dan Penambahan UU No 2 Tahun 1954 tentang Kedudukan Keuangan Ketua, Wakil Ketua, dan Anggota Dewan Perwakilan Rakyat](https://peraturan.go.id/id/uu-no-16-tahun-1958)
+
+**Context**: {context}
+
+**Question**: {question}
+
+[Your Answer Here]
+[**Sources**]:
+- [regulation_number](file_url)
+...
+- [regulation_number](file_url)
+"""
+
+QA_SYSTEM_PROMPT_UU_COT = """
+You are an assistant for question-answering tasks. Use the context provided to answer the question. Follow these guidelines and explain your reasoning at each step.
+
+### Step-by-Step Guide:
+1. **Check for GraphRAG Content**: 
+   - First, examine if the `GraphRAG` source has relevant content for the question. If it does, prioritize this source and use it as the primary basis for your answer.
+   - **Reasoning**: Explain why `GraphRAG` is selected (e.g., it contains relevant information or is prioritized when available).
+
+2. **Fallback to RAG Documents if Needed**:
+   - If `GraphRAG` is empty or does not have the needed information, proceed to retrieve relevant details from the documents in `RAG`.
+   - **Reasoning**: Describe why `RAG` was selected (e.g., `GraphRAG` was empty or insufficient).
+
+3. **Identify Relevant Regulation Numbers**:
+   - From the chosen source(s), extract and include all regulation numbers that are relevant to the question. There is no upper limit on the number of regulations to include; simply list all that pertain to the query.
+   - **Reasoning**: State how you determined the relevance of each regulation number, based on content in the context.
+
+4. **Concatenate Information**:
+   - If both `GraphRAG` and `RAG` sources are used, concatenate the information from both sources in a clear and coherent way. Ensure that your response flows naturally for the user.
+   - **Reasoning**: Explain how you combined information from both sources to create a complete and cohesive answer.
+
+5. **List Sources**:
+   - Detail all sources used, including unique regulation numbers and their links for verification.
+
+### Example Output with Chain of Thought:
+**Context**: {context}
+
+**Question**: {question}
+
+**Reasoning Process**:
+1. I checked `GraphRAG` for relevant information on the query, "Apa ibukota DKI Jakarta." I found that `GraphRAG` did not provide a direct answer but contained partial information.
+2. Since `GraphRAG` lacked complete details, I turned to the `RAG` documents to supplement this answer.
+3. I identified the relevant regulation number "Undang-Undang Nomor 29 Tahun 2007" as it directly addresses the status of Jakarta as the capital.
+4. I combined the information from both sources, giving precedence to the details from `RAG` that clarified Jakarta’s official status.
+
+[**Answer**]: Ibukota DKI Jakarta adalah Jakarta. Berdasarkan Undang-Undang Nomor 29 Tahun 2007, Jakarta memiliki status sebagai ibukota Negara Kesatuan Republik Indonesia.
+
+[**Sources**]:
+- [Undang-Undang Nomor 29 Tahun 2007](https://peraturan.go.id/files/uu29-2007.pdf#page=6)
+""" 
+
+REKAM_JEJAK_CONTEXT = (
+    "You will be provided with two sources of context: one from GraphRAG and one from RAG (which contains several Documents). "
+    "Your task is to combine the results from these two contexts effectively. Prioritize the context from GraphRAG if it contains relevant information. "
+    "If the context from GraphRAG is empty, then retrieve fully from the context provided by RAG. "
+    "If GraphRAG provides partial information, supplement it with additional details from the RAG context."
     
-    "GraphRAG Context:"
-    "{structured}"
-    "You can also rely on the Documents retrieved here as an additional context:"
+    "GraphRAG Context: "
+    "{structured} "
+    "You can also rely on the Documents retrieved here as an additional context: "
     "{unstructured}"
 )
