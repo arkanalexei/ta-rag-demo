@@ -11,7 +11,7 @@ from langchain_huggingface import HuggingFacePipeline, ChatHuggingFace
 # Load environment variables from .env file
 load_dotenv()
 
-def get_llm(model="gpt-4o-mini"):
+def get_llm(model="gpt-4o-mini", temperature=0.5, top_p=0.5):
     if model == "gpt-4o-mini":
         api_key = os.getenv('OPENAI_API_KEY')
         return ChatOpenAI(api_key=api_key, model=model, temperature=0.1)
@@ -21,7 +21,8 @@ def get_llm(model="gpt-4o-mini"):
         return ChatNVIDIA(
             base_url="http://localhost:8000/v1",
             model="meta/llama-3.1-8b-instruct",
-            temperature=0.1,
+            temperature=temperature,
+            top_p=top_p,
             max_tokens=16000
         )
     
