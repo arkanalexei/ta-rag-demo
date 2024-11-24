@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {
+      "id": "23726a34-5b63-4b46-a247-cc5509d3d5fa",
+      "properties": {
+        "page_content": "version https://git\n\nlfs.github.com/spec/v1\n\noid sha256:58a2ac8464fb8eeed6bf8bc12749a992536c66870762bce69ff2b20fb961be47\n\nsize 108269336",
+        "document_metadata": {
+          "source": "triple-uu/Lexid-KG-UU.ttl"
+        }
+      },
+      "type": "document"
+    }
+  ],
+  "relationships": []
+}
