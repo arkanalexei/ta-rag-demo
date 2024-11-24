@@ -10,7 +10,7 @@ from ragas.testset.evolutions import simple
 from utils.utils import load_from_pickle, save_to_pickle
 from utils.llm import get_llm, get_embedding_model
 
-# Setup logging
+# Setup loggingx
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load environment variables and apply nest_asyncio

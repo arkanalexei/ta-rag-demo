@@ -14,6 +14,8 @@ def get_config():
     neo4j_password = os.getenv("NEO4J_PASSWORD")
     neo4j_db = os.getenv("NEO4J_DATABASE")
 
+    graphdb_uri = os.getenv("GRAPHDB_URL")
+
 
     return {
         "openai_api_Key": openai_api_key,
@@ -23,4 +25,5 @@ def get_config():
         "neo4j_username": neo4j_username,
         "neo4j_password": neo4j_password,
         "neo4j_db": neo4j_db,
+        "graphdb_uri": graphdb_uri,
     }

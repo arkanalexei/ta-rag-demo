@@ -61,3 +61,52 @@ def generate_id():
 def set_gpu(gpu):
     torch.cuda.set_device(gpu)
     print(f"Set GPU to {gpu}")
+
+# Function to extract and format subject from URI
+def format_subject(uri):
+    # Extract the identifier from the URI
+    match = re.search(r'/data/([^/]+)$', uri)
+    if not match:
+        return uri  # Return URI if no match found
+    identifier = match.group(1)  # e.g., "UU_2007_40"
+    
+    # Format the identifier into a natural language label
+    parts = identifier.split('_')  # e.g., ["UU", "2007", "40"]
+    result = [''] * len(parts)
+
+    for i, part in enumerate(parts):
+        if i == 0:
+            if part == "UU":
+                result[i] = "Undang-Undang"
+            elif part == "UUD":
+                result[i] = "Undang-Undang Dasar"
+            else:
+                result[i] = part
+        elif i == 1:
+            result[i+1] = f"Tahun {part}"
+        elif i == 2:
+            result[i-1] = f"Nomor {part}"
+        else:
+            result[i] = part
+    
+    return " ".join(result)
+    
+# Function to extract and format predicate from URI
+def format_predicate(uri):
+    # Extract the last part of the predicate URI
+    match = re.search(r'/schema/([^/]+)$', uri)
+    if not match:
+        return uri  # Return URI if no match found
+    predicate = match.group(1)  # e.g., "mempertimbangkan"
+    return predicate  # Already suitable for Bahasa Indonesia
+
+# Function to verbalize triples
+def verbalize_triples(triples):
+    sentences = []
+    for subj_uri, pred_uri, obj_text in triples:
+        # Format subject, predicate, and object
+        subject_label = format_subject(subj_uri)
+        predicate_label = format_predicate(pred_uri)
+        sentence = f"{subject_label} {predicate_label} {obj_text}."
+        sentences.append(sentence)
+    return sentences
