@@ -8,3 +8,8 @@ qdrant/
 .deepeval
 .deepeval-cache.json
 .ipynb_checkpoints/
+Lexid
+archive/joe/
+venv/
+Sample_Docs_Markdown/
+triple-uu/

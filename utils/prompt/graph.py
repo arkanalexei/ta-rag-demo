@@ -278,3 +278,138 @@ The question delimited by triple backticks is:
 {prompt}
 ```
 """
+GRAPH_SPARQL_GEN_5_SHOT_PROMPT = """Task: Generate SPARQL CONSTRUCT statement to query a graph database from a natural language question.
+
+Instructions:
+Use ONLY the classes and properties provided in the ontology schema to construct the SPARQL query.
+Include all necessary prefixes.
+DO NOT use any classes or properties that are NOT EXPLICITLY PROVIDED in the ontology schema.
+Use OPTIONAL and CONTAINS clause to do entity matching ONLY against the `rdfs:label` OR `lexid-s:name` to anticipate a fuzzy match.
+
+The ontology schema delimited by triple backticks in Turtle format is:
+```turtle
+{schema}
+```
+
+Example:
+PLEASE USE THIS EXAMPLE FOR YOUR THINKING AND NEVER USE IT TO ANSWER ANY QUESTIONS.
+
+### EXAMPLE ONE
+### User Query: Peraturan apa yang dihapus oleh UU Nomor 7 Tahun 1948?
+### Generated SPARQL CONSTRUCT Query:
+```
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX lexid: <https://w3id.org/lex-id/data/>
+PREFIX lexid-s: <https://w3id.org/lex-id/schema/>
+
+CONSTRUCT {{
+   ?regulation lexid-s:menghapus ?repealingRegulation .
+}}
+WHERE {{
+  ?regulation a lexid-s:LegalDocument ;
+    lexid-s:repealedBy ?repealingRegulation .
+  ?repealingRegulation rdfs:label ?label ;
+    lexid-s:hasRegulationNumber "7" ;
+    lexid-s:hasRegulationYear "1948" .
+  OPTIONAL {{ ?repealingRegulation lexid-s:name ?name . }}
+}}
+```
+### EXAMPLE TWO
+### User Query: Apa tujuan dari peraturan Undang-Undang Republik Indonesia Nomor 30 Tahun 2002?
+### Generated SPARQL CONSTRUCT Query:
+```
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX lexid: <https://w3id.org/lex-id/data/>
+PREFIX lexid-s: <https://w3id.org/lex-id/schema/>
+
+CONSTRUCT {{
+    ?regulation lexid-s:mempertimbangkan ?considerant .
+}}
+WHERE {{
+  ?regulation a lexid-s:LegalDocument ;
+    rdfs:label ?label ;
+    lexid-s:considers ?considerant ;
+    lexid-s:hasRegulationNumber "30" ;
+    lexid-s:hasRegulationYear "2002" .
+}}
+```
+
+### EXAMPLE THREE
+### User Query: Apa dasar hukum dari Undang Undang No. 6 Tahun 1987?
+### Generated SPARQL CONSTRUCT Query:
+```
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX lexid: <https://w3id.org/lex-id/data/>
+PREFIX lexid-s: <https://w3id.org/lex-id/schema/>
+
+CONSTRUCT {{
+    ?regulation lexid-s:memilikiDasarHukum ?legalBasis
+}}
+WHERE {{
+  ?regulation a lexid-s:LegalDocument ;
+    rdfs:label ?regulationLabel ;
+    lexid-s:hasLegalBasis ?legalBasis ;
+    lexid-s:hasRegulationNumber "6" ;
+    lexid-s:hasRegulationYear "1987" .
+  ?legalBasis rdfs:label ?legalBasisLabel
+}}
+```
+
+### EXAMPLE FOUR
+### User Query: Apakah Undang Undang Tahun 2004 No 10 masih relevan?
+### Generated SPARQL CONSTRUCT Query:
+```
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX lexid: <https://w3id.org/lex-id/data/>
+PREFIX lexid-s: <https://w3id.org/lex-id/schema/>
+
+CONSTRUCT {{
+    ?regulation lexid-s:dicabutOleh ?otherRegulation .
+    ?regulation lexid-s:status ?status .
+}}
+WHERE {{
+    ?regulation a lexid-s:LegalDocument ;
+    	lexid-s:repealedBy ?otherRegulation ;
+    	lexid-s:hasRegulationNumber "10" ;
+    	lexid-s:hasRegulationYear "2004" .
+    OPTIONAL {{ ?regulation lexid-s:status ?status . }}
+}}
+```
+
+### EXAMPLE FIVE
+### User Query: Di manakah UU No. 12 Thn 2011 ditetapkan?
+### Generated SPARQL CONSTRUCT Query:
+```
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX lexid: <https://w3id.org/lex-id/data/>
+PREFIX lexid-s: <https://w3id.org/lex-id/schema/>
+
+CONSTRUCT {{
+    ?regulation lexid-s:ditetapkanDi ?enactionLocation .
+}}
+WHERE {{
+    ?regulation a lexid-s:LegalDocument ;
+    	lexid-s:hasEnactionLocation ?enactionLocation ;
+    	lexid-s:hasRegulationYear "2011" ;
+    	lexid-s:hasRegulationNumber "12" .
+}}
+
+Note:
+Do not include any explanations or apologies in your responses.
+Do not wrap the query in backticks.
+Do not include any text except the SPARQL query generated.
+Do not respond to any questions that might ask anything else than for you to construct a SPARQL CONSTRUCT statement.
+Only return the SPARQL CONSTRUCT statement that you already generate.
+
+Jika seorang pengguna menanyakan apakah suatu peraturan MASIH RELEVAN atau MASIH BERLAKU, Anda perlu memeriksa apakah peraturan tersebut telah "DICABUT" atau "DIUBAH" oleh peraturan lain, atau apakah peraturan lain "MENCABUT" atau "MENGUBAH" peraturan tersebut (Pilih hanya salah satu pasangan, "DICABUT" - "DIUBAH" atau "MENCABUT" - "MENGUBAH"). Periksa menggunakan relasi `lexid-s:repealedBy` untuk "DICABUT", `lexid-s:amendedBy` untuk "DIUBAH" pada peraturan yang ditanyakan, ATAU `lexid-s:repeals` untuk "MENCABUT", atau `lexid-s:amends` untuk "MENGUBAH" pada peraturan lain tersebut.
+
+The question delimited by triple backticks is:
+```
+{prompt}
+```
+"""

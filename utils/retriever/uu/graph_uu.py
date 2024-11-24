@@ -5,7 +5,7 @@ from langchain_core.prompts import PromptTemplate
 
 from utils.database.neo4j import Neo4jGraphStore
 from utils.database.graphdb import GraphDBStore
-from utils.prompt.graph import GRAPH_CYPHER_GEN_PROMPT, GRAPH_QA_GEN_PROMPT, GRAPH_SPARQL_GEN_0_SHOT_PROMPT, GRAPH_SPARQL_QA_GEN_PROMPT, GRAPH_SPARQL_GEN_1_SHOT_PROMPT, GRAPH_SPARQL_GEN_3_SHOT_PROMPT
+from utils.prompt.graph import GRAPH_CYPHER_GEN_PROMPT, GRAPH_QA_GEN_PROMPT, GRAPH_SPARQL_GEN_0_SHOT_PROMPT, GRAPH_SPARQL_QA_GEN_PROMPT, GRAPH_SPARQL_GEN_1_SHOT_PROMPT, GRAPH_SPARQL_GEN_3_SHOT_PROMPT, GRAPH_SPARQL_GEN_5_SHOT_PROMPT
 
 from utils.chain.custom_graphdb import CustomOntotextGraphDBQAChain
 
@@ -60,6 +60,7 @@ def get_graph_from_custom_graphdb_uu(llm: BaseLanguageModel, config: dict, sparq
         0: GRAPH_SPARQL_GEN_0_SHOT_PROMPT,
         1: GRAPH_SPARQL_GEN_1_SHOT_PROMPT,
         3: GRAPH_SPARQL_GEN_3_SHOT_PROMPT,
+        5: GRAPH_SPARQL_GEN_5_SHOT_PROMPT,
         # to be added another k-shot prompt
     }
     
