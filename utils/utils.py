@@ -63,50 +63,65 @@ def set_gpu(gpu):
     print(f"Set GPU to {gpu}")
 
 # Function to extract and format subject from URI
-def format_subject(uri):
+def format_iri(uri):
     # Extract the identifier from the URI
     match = re.search(r'/data/([^/]+)$', uri)
     if not match:
+        match = re.search(r'/schema/([^/]+)$', uri)
+    if not match:
         return uri  # Return URI if no match found
+        
     identifier = match.group(1)  # e.g., "UU_2007_40"
     
     # Format the identifier into a natural language label
     parts = identifier.split('_')  # e.g., ["UU", "2007", "40"]
-    result = [''] * len(parts)
+    result_lst = [''] * len(parts)
 
-    for i, part in enumerate(parts):
-        if i == 0:
-            if part == "UU":
-                result[i] = "Undang-Undang"
-            elif part == "UUD":
-                result[i] = "Undang-Undang Dasar"
+    if parts[0] == "UU" or parts[0] == "UUD":
+        for i, part in enumerate(parts):
+            if i == 0:
+                if part == "UU":
+                    result_lst[i] = "Undang-Undang"
+                elif part == "UUD":
+                    result_lst[i] = "Undang-Undang Dasar"
+                else:
+                    result_lst[i] = part
+            elif i == 1:
+                result_lst[i] = f"Tahun {part}"
+            elif i == 2:
+                result_lst[i] = f"Nomor {part}"
             else:
-                result[i] = part
-        elif i == 1:
-            result[i+1] = f"Tahun {part}"
-        elif i == 2:
-            result[i-1] = f"Nomor {part}"
-        else:
-            result[i] = part
+                result_lst[i] = part
+    else:
+        for i, part in enumerate(parts):
+            result_lst[i] = part
     
-    return " ".join(result)
+    return " ".join(result_lst)
     
 # Function to extract and format predicate from URI
 def format_predicate(uri):
     # Extract the last part of the predicate URI
-    match = re.search(r'/schema/([^/]+)$', uri)
+    match = re.search(r'/schema/([^/]+)$', uri) # lexid-s
     if not match:
-        return uri  # Return URI if no match found
-    predicate = match.group(1)  # e.g., "mempertimbangkan"
-    return predicate  # Already suitable for Bahasa Indonesia
+        match = re.search(r'/22-rdf-syntax-ns#([^/]+)$', uri) # rdf
+    if not match:
+        match = re.search(r'/rdf-schema#([^/]+)$', uri) # rdfs
+    if not match:
+        match = re.search(r'/terms/([^/]+)$', uri) # dct
+    if not match:
+        return uri
+        
+    predicate = match.group(1)  # take the first URI directory
+    return predicate
 
 # Function to verbalize triples
 def verbalize_triples(triples):
     sentences = []
-    for subj_uri, pred_uri, obj_text in triples:
+    for subj, pred_uri, obj in triples:
         # Format subject, predicate, and object
-        subject_label = format_subject(subj_uri)
+        subject_label = format_iri(subj)
         predicate_label = format_predicate(pred_uri)
-        sentence = f"{subject_label} {predicate_label} {obj_text}."
+        object_label = format_iri(obj)
+        sentence = f"{subject_label} {predicate_label} {object_label}."
         sentences.append(sentence)
     return sentences

@@ -29,8 +29,9 @@ class CustomOntotextGraphDBQAChain(OntotextGraphDBQAChain):
         )
         query_results = self._execute_query(generated_sparql)
 
-        qa_chain_result = self.qa_chain.invoke(
-            {"prompt": prompt, "context": query_results}, callbacks=callbacks
-        )
-        result = qa_chain_result[self.qa_chain.output_key]
-        return {self.output_key: result, "generated_sparql": generated_sparql, "query_results": query_results}
+        # qa_chain_result = self.qa_chain.invoke(
+        #     {"prompt": prompt, "context": query_results}, callbacks=callbacks
+        # )
+        # result = qa_chain_result[self.qa_chain.output_key]
+        # return {self.output_key: result, "generated_sparql": generated_sparql, "query_results": query_results}
+        return {"result": query_results, "generated_sparql": generated_sparql, "query_results": query_results,}

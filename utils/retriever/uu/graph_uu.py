@@ -5,7 +5,7 @@ from langchain_core.prompts import PromptTemplate
 
 from utils.database.neo4j import Neo4jGraphStore
 from utils.database.graphdb import GraphDBStore
-from utils.prompt.graph import GRAPH_CYPHER_GEN_PROMPT, GRAPH_QA_GEN_PROMPT, GRAPH_SPARQL_GEN_0_SHOT_PROMPT, GRAPH_SPARQL_QA_GEN_PROMPT, GRAPH_SPARQL_GEN_1_SHOT_PROMPT, GRAPH_SPARQL_GEN_3_SHOT_PROMPT, GRAPH_SPARQL_GEN_5_SHOT_PROMPT
+from utils.prompt.graph import *
 
 from utils.chain.custom_graphdb import CustomOntotextGraphDBQAChain
 
@@ -55,14 +55,37 @@ def get_graph_from_graphdb_uu(llm: BaseLanguageModel, config: dict, sparql_k: in
 
     return chain
 
-def get_graph_from_custom_graphdb_uu(llm: BaseLanguageModel, config: dict, sparql_k: int = 0):
+def get_prompt_template(sparql_k: int, query_type: str, is_cot: bool):
     shot_map = {
-        0: GRAPH_SPARQL_GEN_0_SHOT_PROMPT,
-        1: GRAPH_SPARQL_GEN_1_SHOT_PROMPT,
-        3: GRAPH_SPARQL_GEN_3_SHOT_PROMPT,
-        5: GRAPH_SPARQL_GEN_5_SHOT_PROMPT,
-        # to be added another k-shot prompt
+        (0, "construct", False): CONSTRUCT_SPARQL_GEN_0_SHOT_PROMPT,
+        (1, "construct", False): CONSTRUCT_SPARQL_GEN_1_SHOT_PROMPT,
+        (2, "construct", False): CONSTRUCT_SPARQL_GEN_2_SHOT_PROMPT,
+        (3, "construct", False): CONSTRUCT_SPARQL_GEN_3_SHOT_PROMPT,
+        (4, "construct", False): CONSTRUCT_SPARQL_GEN_4_SHOT_PROMPT,
+        (5, "construct", False): CONSTRUCT_SPARQL_GEN_5_SHOT_PROMPT,
+        (0, "select", False): SELECT_SPARQL_GEN_0_SHOT_PROMPT,
+        (1, "select", False): SELECT_SPARQL_GEN_1_SHOT_PROMPT,
+        (2, "select", False): SELECT_SPARQL_GEN_2_SHOT_PROMPT,
+        (3, "select", False): SELECT_SPARQL_GEN_3_SHOT_PROMPT,
+        (4, "select", False): SELECT_SPARQL_GEN_4_SHOT_PROMPT,
+        (5, "select", False): SELECT_SPARQL_GEN_5_SHOT_PROMPT,
+        (0, "construct", True): CONSTRUCT_SPARQL_GEN_COT_0_SHOT_PROMPT,
+        (1, "construct", True): CONSTRUCT_SPARQL_GEN_COT_1_SHOT_PROMPT,
+        (2, "construct", True): CONSTRUCT_SPARQL_GEN_COT_2_SHOT_PROMPT,
+        (3, "construct", True): CONSTRUCT_SPARQL_GEN_COT_3_SHOT_PROMPT,
+        (4, "construct", True): CONSTRUCT_SPARQL_GEN_COT_4_SHOT_PROMPT,
+        (5, "construct", True): CONSTRUCT_SPARQL_GEN_COT_5_SHOT_PROMPT,
+        (0, "select", True): SELECT_SPARQL_GEN_COT_0_SHOT_PROMPT,
+        (1, "select", True): SELECT_SPARQL_GEN_COT_1_SHOT_PROMPT,
+        (2, "select", True): SELECT_SPARQL_GEN_COT_2_SHOT_PROMPT,
+        (3, "select", True): SELECT_SPARQL_GEN_COT_3_SHOT_PROMPT,
+        (4, "select", True): SELECT_SPARQL_GEN_COT_4_SHOT_PROMPT,
+        (5, "select", True): SELECT_SPARQL_GEN_COT_5_SHOT_PROMPT,
+        # add prompt for another scenario
     }
+    return shot_map[(sparql_k, query_type, is_cot)]
+
+def get_graph_from_custom_graphdb_uu(llm: BaseLanguageModel, config: dict, sparql_k: int = 0, query_type: str = "construct", is_cot: bool = False):
     
     graphdb = GraphDBStore(config=config)
     graph = graphdb.get_graph()
@@ -71,11 +94,11 @@ def get_graph_from_custom_graphdb_uu(llm: BaseLanguageModel, config: dict, sparq
     qa_prompt = PromptTemplate(
         input_variables=["context", "prompt"], template=qa_generation_template)
 
-    sparql_generation_template = shot_map[sparql_k]
+    sparql_generation_template = get_prompt_template(sparql_k=sparql_k, query_type=query_type, is_cot=is_cot)
     sparql_generation_prompt = PromptTemplate(input_variables=["prompt", "schema"], template=sparql_generation_template)
 
     chain = CustomOntotextGraphDBQAChain.from_llm(
-        llm=llm, graph=graph, verbose=True, sparql_generation_prompt=sparql_generation_prompt, max_fix_retries=5, qa_prompt=qa_prompt, allow_dangerous_requests=True
+        llm=llm, graph=graph, verbose=True, sparql_generation_prompt=sparql_generation_prompt, max_fix_retries=0, qa_prompt=qa_prompt, allow_dangerous_requests=True
     )
     
     # chain = CustomOntotextGraphDBQAChain.from_llm(

@@ -104,3 +104,23 @@ class QdrantIndexManager(VectorIndexManager):
         except Exception as e:
             print(f"Error loading index: {e}")
             return None
+            
+    def create_index(self, vector_size, distance_metric, hnsw_config=None):
+        """
+        Creates a new Qdrant index with optional HNSW configuration.
+        """
+        try:
+            params = VectorParams(
+                size=vector_size,
+                distance=Distance.COSINE if distance_metric == "Cosine" else Distance.EUCLID,
+            )
+            if hnsw_config:
+                params.hnsw_config = hnsw_config
+
+            self.client.recreate_collection(
+                collection_name=self.index_name,
+                vectors_config=params,
+            )
+            print(f"Created index '{self.index_name}' with vector size={vector_size}, distance={distance_metric}, HNSW={bool(hnsw_config)}.")
+        except Exception as e:
+            print(f"Error creating index: {e}")

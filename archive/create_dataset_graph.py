@@ -53,7 +53,7 @@ def main():
         doc.metadata["unique_id"] = f"doc_{i}"
 
     # Split into batches of 1 item each
-    all_documents_batches = split_into_batches(all_documents, 857) # len(all_documents)
+    all_documents_batches = split_into_batches(all_documents, len(all_documents)) # 857
     logging.info(f"Split into {len(all_documents_batches)} batches")
 
     # Setup TestsetGenerator
@@ -69,7 +69,7 @@ def main():
     test_size = 1
     distributions = {simple: 1}
 
-    # Get the last processed batch
+    # Get the last processed batchW
     last_processed_batch = get_last_processed_batch()
     logging.info(f"Resuming from batch {last_processed_batch}")
 
@@ -113,8 +113,8 @@ def main():
     # Save final result
     
     # save_to_pickle(merged_testset, 'final_merged_testset_ttl')
-    save_to_pickle(merged_testset, 'final_merged_testset_meta_ttl')
-    logging.info("Processing completed. Final testset saved as 'pickles/final_merged_testset_meta_ttl'")
+    save_to_pickle(merged_testset, 'final_merged_testset_meta_2_ttl')
+    logging.info("Processing completed. Final testset saved as 'pickles/final_merged_testset_meta_2_ttl'")
 
 if __name__ == "__main__":
     testing = main()
